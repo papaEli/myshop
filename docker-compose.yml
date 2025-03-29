@@ -11,7 +11,7 @@ services:
       context: ./
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./db.sqlite3:/usr/src/app/db.sqlite3
+      - ./db.sqlite3:/opt/app/db.sqlite3
     ports:
       - 8000:8000
     environment:
@@ -26,6 +26,8 @@ services:
     build:
       context: ./
     command: celery --app=myshop worker -l INFO -P threads -B
+    volumes:
+      - ./db.sqlite3:/opt/app/db.sqlite3
     environment:
       - DEBUG=1
       - SECRET_KEY=django-insecure-vo&v6)zt$tfddt^xhc_yq2_1&9+dd-=9y0n2!^jda^rsr7h=*k

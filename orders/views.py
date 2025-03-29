@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
-from .models import OrderItem
+from .models import OrderItem, Order
 from .forms import OrderForm
 from cart.cart import Cart
 from .tasks import order_created
+from loguru import logger
 
 
 def order_create(request):
@@ -19,6 +20,7 @@ def order_create(request):
                     quantity=item['quantity']
                 )
             cart.clear()
+            logger.info(Order.objects.all())
             order_created.delay(order.id)
             return render(request, 'orders/order/created.html', {'order': order})
     else:

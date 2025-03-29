@@ -2,10 +2,13 @@ from celery import shared_task
 from django.core.mail import send_mail
 from .models import Order
 from myshop import settings
+from loguru import logger
 
 
 @shared_task
 def order_created(order_id):
+    logger.info(order_id)
+    logger.info(Order.objects.all())
     order = Order.objects.get(id=order_id)
 
     subject = f'Order nr. {order.id}'
