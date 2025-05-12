@@ -1,7 +1,10 @@
 import os
 from pathlib import Path
-
+import environ
 from django.conf.global_settings import MEDIA_URL
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -131,6 +134,6 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 
 STRIPE_PUBLISHABLE_KEY = 'pk_test_51RAD1GFNtrvWvY6VCgv4XTxfd1BuPsR7a2DSRxvyjLiFYF0FZhq46KUBMvFHogSCEqCEpfbLKw18dhLgT9Hb9DK600MYSrTFdi'
-STRIPE_SECRET_KEY = 'sk_test_51RAD1GFNtrvWvY6VTWNdhn3d8zIj4uyc2O0VxNg7adUS9R78xQ1yWBaJ8SKp4H5Z98elwfChIp6kVTWGopXFuOwm00Ngm3Reb8'
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
 STRIPE_API_VERSION = '2022-08-01'
 STRIPE_WEBHOOK_SECRET = 'whsec_349fb751582f61427fe8ede8d675ec3751147f4aa713c56d4f81468543e439f6'
