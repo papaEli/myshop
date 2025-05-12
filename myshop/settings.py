@@ -1,10 +1,10 @@
+import os
 from pathlib import Path
 
 from django.conf.global_settings import MEDIA_URL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     'shop.apps.ShopConfig',
     'cart.apps.CartConfig',
     'orders.apps.OrdersConfig',
+    'payment.apps.PaymentConfig',
+    'coupons.apps.CouponsConfig',
 ]
 
 MIDDLEWARE = [
@@ -104,6 +106,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -118,5 +121,16 @@ CART_SESSION_ID = 'cart'
 EMAIL_HOST_USER = 'viowolf050104@gmail.com'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-CELERY_BROKER_URL = "redis://redis:6379"
-CELERY_RESULT_BACKEND = "redis://redis:6379"
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = 6379
+CELERY_BROKER_URL = "redis://" + REDIS_HOST + ":" + str(REDIS_PORT) + "/0"
+CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":" + str(REDIS_PORT) + "/0"
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51RAD1GFNtrvWvY6VCgv4XTxfd1BuPsR7a2DSRxvyjLiFYF0FZhq46KUBMvFHogSCEqCEpfbLKw18dhLgT9Hb9DK600MYSrTFdi'
+STRIPE_SECRET_KEY = 'sk_test_51RAD1GFNtrvWvY6VTWNdhn3d8zIj4uyc2O0VxNg7adUS9R78xQ1yWBaJ8SKp4H5Z98elwfChIp6kVTWGopXFuOwm00Ngm3Reb8'
+STRIPE_API_VERSION = '2022-08-01'
+STRIPE_WEBHOOK_SECRET = 'whsec_349fb751582f61427fe8ede8d675ec3751147f4aa713c56d4f81468543e439f6'

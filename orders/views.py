@@ -1,9 +1,12 @@
-from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import OrderItem, Order
 from .forms import OrderForm
 from cart.cart import Cart
 from .tasks import order_created
 from loguru import logger
+from django.urls import reverse
+from django.contrib.admin.views.decorators import staff_member_required
 
 
 def order_create(request):
@@ -22,7 +25,15 @@ def order_create(request):
             cart.clear()
             logger.info(Order.objects.all())
             order_created.delay(order.id)
-            return render(request, 'orders/order/created.html', {'order': order})
+            request.session['order_id'] = order.id
+            return redirect(reverse('payment:process'))
     else:
         form = OrderForm()
     return render(request, 'orders/order/create.html', {'cart': cart, 'form': form})
+
+@staff_member_required
+def admin_order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, 'orders/order/detail.html', {'order': order})
+
+

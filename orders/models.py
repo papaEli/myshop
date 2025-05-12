@@ -4,6 +4,7 @@ from shop.models import Product
 
 
 class Order(models.Model):
+    stripe_id = models.CharField(max_length=255, blank=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField()
@@ -26,6 +27,14 @@ class Order(models.Model):
     def get_total_cost(self):
         return sum(item.get_cost() for item in self.items.all())
 
+    def get_stripe_url(self):
+        if not self.stripe_id:
+            return ''
+        if '_test_' in self.stripe_id:
+            path = '/test/'
+        else:
+            path = '/'
+        return f"https://dashboard.stripe.com{path}payments/{self.stripe_id}"
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order,
