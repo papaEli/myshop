@@ -6,10 +6,11 @@ from loguru import logger
 
 logger.info('Логирование корзины начато')
 
+
 class Cart:
 
-    def __init__(self, request):
-        self.session = request.session
+    def __init__(self, session):
+        self.session = session
         cart = self.session.get(settings.CART_SESSION_ID)
         if not cart:
             cart = self.session[settings.CART_SESSION_ID] = {}
@@ -17,6 +18,7 @@ class Cart:
         self.cart = cart
         self.coupon_id = self.session.get('coupon_id')
         logger.debug(f"Купон {self.coupon_id}")
+
     def __iter__(self):
         product_ids = self.cart.keys()
         products = Product.objects.filter(id__in=product_ids)
@@ -28,7 +30,7 @@ class Cart:
             item['price'] = Decimal(item['price'])
             item['total_price'] = item['price'] * item['quantity']
             yield item
-    
+
     def add(self, product, quantity=1, override_quantity=False):
         product_id = str(product.id)
         if product_id not in self.cart:
@@ -84,5 +86,5 @@ class Cart:
     def get_total_price_after_discount(self):
         total = self.get_total_price()
         discount = self.get_discount()
-        logger.debug(f'Итоговая стоимость {total-discount}')
+        logger.debug(f'Итоговая стоимость {total - discount}')
         return (total - discount).quantize(Decimal('.01'))

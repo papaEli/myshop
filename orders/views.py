@@ -10,11 +10,16 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 
 def order_create(request):
-    cart = Cart(request)
+    cart = Cart(request.session)
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
             order = form.save()
+            if cart.coupon:
+                order.coupon = cart.coupon
+                order.discount = order.coupon.discount
+            order.save()
+
             for item in cart:
                 OrderItem.objects.create(
                     order=order,

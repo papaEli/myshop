@@ -1,10 +1,8 @@
 import os
 from pathlib import Path
-import environ
 from django.conf.global_settings import MEDIA_URL
-
-env = environ.Env()
-environ.Env.read_env()
+from os import environ
+from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,12 +10,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-u1g%=dhr)5_sj#sq02o#9f%-1=l+04(luvq)f(^e^p7wp=1c8@'
+SECRET_KEY = environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS =[]
+# environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 # Application definition
 
@@ -71,9 +70,18 @@ WSGI_APPLICATION = 'myshop.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': environ.get('DATABASE_NAME'),
+        'USER': environ.get('DATABASE_USER'),
+        'PASSWORD': environ.get('DATABASE_PASSWORD'),
+        'HOST': environ.get('DATABASE_HOST','dbps'),
+        'PORT': environ.get('DATABASE_PORT', '5432'),
+        }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
+
 }
 
 # Password validation
@@ -121,19 +129,35 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 CART_SESSION_ID = 'cart'
 
-EMAIL_HOST_USER = 'viowolf050104@gmail.com'
+EMAIL_HOST_USER = environ.get('DJANGO_EMAIL')
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-REDIS_HOST = '127.0.0.1'
-REDIS_PORT = 6379
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f'redis://{environ.get('REDIS_HOST','redis')}:{int(environ.get('REDIS_PORT','6379'))}/{environ.get('REDIS_DB')}',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+    }
+}
+
+REDIS_HOST = environ.get('REDIS_HOST', 'redis')
+REDIS_PORT = int(environ.get('REDIS_PORT', '6379'))
+REDIS_DB = 1
+CACHE_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
+BROKER_URL = CACHE_BACKEND
+RESULT_BACKEND = BROKER_URL
+
 CELERY_BROKER_URL = "redis://" + REDIS_HOST + ":" + str(REDIS_PORT) + "/0"
 CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":" + str(REDIS_PORT) + "/0"
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 STRIPE_PUBLISHABLE_KEY = 'pk_test_51RAD1GFNtrvWvY6VCgv4XTxfd1BuPsR7a2DSRxvyjLiFYF0FZhq46KUBMvFHogSCEqCEpfbLKw18dhLgT9Hb9DK600MYSrTFdi'
-STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
+STRIPE_SECRET_KEY = environ.get('STRIPE_SECRET_KEY')
 STRIPE_API_VERSION = '2022-08-01'
-STRIPE_WEBHOOK_SECRET = 'whsec_349fb751582f61427fe8ede8d675ec3751147f4aa713c56d4f81468543e439f6'
+STRIPE_WEBHOOK_SECRET = environ.get('STRIPE_WEBHOOK_SECRET')
